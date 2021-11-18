@@ -32,9 +32,9 @@ struct ProgramOptions {
 }
 
 fn parse_args() -> ProgramOptions {
-    let matches = App::new("archive-maildir")
-        .version("0.1")
-        .author("Emanuele Di Giacomo <emanuele@digiacomo.cc>")
+    let matches = App::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
         .about("Split mailbox and archive emails")
         .arg(
             Arg::with_name("output-dir")

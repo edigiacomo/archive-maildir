@@ -12,6 +12,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "archive-maildir"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "log",
+ "maildir",
+ "simple_logger",
+]
+
+[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -216,17 +227,6 @@ dependencies = [
  "colored",
  "log",
  "winapi",
-]
-
-[[package]]
-name = "splitmailbox"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "clap",
- "log",
- "maildir",
- "simple_logger",
 ]
 
 [[package]]
