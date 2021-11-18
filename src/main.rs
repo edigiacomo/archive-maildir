@@ -32,7 +32,7 @@ struct ProgramOptions {
 }
 
 fn parse_args() -> ProgramOptions {
-    let matches = App::new("splimailbox")
+    let matches = App::new("archive-maildir")
         .version("0.1")
         .author("Emanuele Di Giacomo <emanuele@digiacomo.cc>")
         .about("Split mailbox and archive emails")
