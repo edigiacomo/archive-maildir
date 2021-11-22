@@ -89,7 +89,7 @@ fn parse_args() -> ProgramOptions {
             Arg::with_name("before")
                 .short("b")
                 .long("before")
-                .value_name("DATE")
+                .value_name("YYYY-mm-dd")
                 .help("Archive emails before the given date"),
         )
         .arg(
