@@ -90,6 +90,12 @@ fn parse_args() -> ProgramOptions {
                 .short("b")
                 .long("before")
                 .value_name("YYYY-mm-dd")
+                .validator(|v| {
+                    match NaiveDate::parse_from_str(&v, "%Y-%m-%d") {
+                        Ok(_)  => Ok(()),
+                        Err(e) => Err(format!("{}", e)),
+                    }
+                })
                 .help("Archive emails before the given date"),
         )
         .arg(
@@ -213,18 +219,18 @@ fn main() {
         .init()
         .unwrap();
     let before = match opts.before {
-        Some(s) => NaiveDate::parse_from_str(&s, "%Y-%m-%d").map_err(|e| format!("{} ({})", e, s)),
+        // NOTE: the value is already validated
+        Some(s) => NaiveDate::parse_from_str(&s, "%Y-%m-%d").unwrap(),
         None => {
             let now = Utc::now().naive_utc().date();
             now.clone()
                 .with_year(now.year() - 1)
-                .ok_or("Error while setting on year ago as threshold".to_string())
-        }
-    }
-    .unwrap_or_else(|e| {
-        error!("While processing time threshold: {}", e);
-        std::process::exit(1);
-    });
+                .unwrap_or_else(|| {
+                    error!("While processing time threshold");
+                    std::process::exit(1);
+                })
+        },
+    };
     let mail_archiver = create_mail_archiver(opts.archive_mode);
     info!(
         "Archiving emails in maildir {} older than {}",
