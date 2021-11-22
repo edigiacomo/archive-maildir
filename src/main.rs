@@ -238,7 +238,12 @@ fn main() {
                     Ok(timestamp) => {
                         let date = NaiveDateTime::from_timestamp(timestamp, 0).date();
                         if date < before {
-                            debug!("Email {} date {} is older than threshold {}", mail.id(), date, before);
+                            debug!(
+                                "Email {} date {} is older than threshold {}",
+                                mail.id(),
+                                date,
+                                before
+                            );
                             let mut output_folder = PathBuf::from(&opts.output_dir);
                             output_folder.push(format!(
                                 "{}{}{}",
@@ -262,7 +267,12 @@ fn main() {
                                 .archive_email(&mail, &opts.input_path, &to_maildir)
                                 .unwrap();
                         } else {
-                            debug!("Ignoring email {}: date {} is older than threshold {}", mail.id(), date, before);
+                            debug!(
+                                "Ignoring email {}: date {} is older than threshold {}",
+                                mail.id(),
+                                date,
+                                before
+                            );
                         }
                     }
                     Err(e) => error!(
