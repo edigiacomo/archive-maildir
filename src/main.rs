@@ -1,5 +1,5 @@
 use chrono::Datelike;
-use chrono::{NaiveDateTime, Utc};
+use chrono::{NaiveDate, NaiveDateTime, Utc};
 use clap::{App, Arg};
 use log::{debug, error, info, LevelFilter};
 use maildir::{MailEntry, Maildir};
@@ -208,18 +208,23 @@ fn create_mail_archiver(mode: ArchiveMode) -> Box<dyn MaildirArchiver> {
 
 fn main() {
     let opts = parse_args();
-    let before = match opts.before {
-        Some(s) => NaiveDateTime::parse_from_str(&s, "%Y-%m-%d").unwrap(),
-        None => {
-            let now = Utc::now().naive_utc();
-            now.clone().with_year(now.year() - 1).unwrap()
-        }
-    }
-    .date();
     SimpleLogger::new()
         .with_level(opts.verbosity)
         .init()
         .unwrap();
+    let before = match opts.before {
+        Some(s) => NaiveDate::parse_from_str(&s, "%Y-%m-%d").map_err(|e| format!("{} ({})", e, s)),
+        None => {
+            let now = Utc::now().naive_utc().date();
+            now.clone()
+                .with_year(now.year() - 1)
+                .ok_or("Error while setting on year ago as threshold".to_string())
+        }
+    }
+    .unwrap_or_else(|e| {
+        error!("While processing time threshold: {}", e);
+        std::process::exit(1);
+    });
     let mail_archiver = create_mail_archiver(opts.archive_mode);
     info!(
         "Archiving emails in maildir {} older than {}",
