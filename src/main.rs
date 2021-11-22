@@ -35,7 +35,7 @@ fn parse_args() -> ProgramOptions {
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
-        .about("Split mailbox and archive emails")
+        .about("Archive emails from maildir")
         .arg(
             Arg::with_name("output-dir")
                 .short("o")
