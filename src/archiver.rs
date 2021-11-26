@@ -1,7 +1,6 @@
-use std::io::Read;
-use std::fs::File;
 use maildir::{MailEntry, Maildir};
-
+use std::fs::File;
+use std::io::Read;
 
 #[derive(Debug)]
 pub enum MaildirArchiverError {
