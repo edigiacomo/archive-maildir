@@ -118,26 +118,26 @@ fn parse_args() -> ProgramOptions {
         output_dir: matches.value_of("output-dir").unwrap().into(),
         before: matches
             .value_of("before")
-            .and_then(|s| Some(s.to_string()))
+            .map(|s| s.to_string())
             .or(None),
         prefix: matches.value_of("prefix").unwrap().into(),
         suffix: matches.value_of("suffix").unwrap().into(),
         split_by: match matches.value_of("split-by").unwrap() {
             "day" => SplitBy::Day,
             "month" => SplitBy::Month,
-            "year" | _ => SplitBy::Year,
+            _ => SplitBy::Year,
         },
         verbosity: match matches.occurrences_of("verbose") {
             0 => LevelFilter::Off,
             1 => LevelFilter::Error,
             2 => LevelFilter::Warn,
             3 => LevelFilter::Info,
-            4 | _ => LevelFilter::Debug,
+            _ => LevelFilter::Debug,
         },
         archive_mode: match matches.value_of("mode").unwrap() {
             "copy" => ArchiveMode::Copy,
             "move" => ArchiveMode::Move,
-            "dry-run" | _ => ArchiveMode::DryRun,
+            _ => ArchiveMode::DryRun,
         },
     };
     p
