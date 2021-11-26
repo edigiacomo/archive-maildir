@@ -143,16 +143,34 @@ fn parse_args() -> ProgramOptions {
     p
 }
 
-pub trait MaildirArchiver {
+#[derive(Debug)]
+enum MaildirArchiverError {
+    IoError(std::io::Error),
+    MaildirError(maildir::MaildirError),
+}
+
+impl From<std::io::Error> for MaildirArchiverError {
+    fn from(value: std::io::Error) -> Self {
+        MaildirArchiverError::IoError(value)
+    }
+}
+
+impl From<maildir::MaildirError> for MaildirArchiverError {
+    fn from(value: maildir::MaildirError) -> Self {
+        MaildirArchiverError::MaildirError(value)
+    }
+}
+
+trait MaildirArchiver {
     fn archive_email(
         &self,
         mail: &MailEntry,
         from_maildir: &Maildir,
         to_maildir: &Maildir,
-    ) -> Result<(), ()>;
+    ) -> Result<(), MaildirArchiverError>;
 }
 
-pub struct DryRunMaildirArchiver {}
+struct DryRunMaildirArchiver {}
 
 impl MaildirArchiver for DryRunMaildirArchiver {
     fn archive_email(
@@ -160,7 +178,7 @@ impl MaildirArchiver for DryRunMaildirArchiver {
         _mail: &MailEntry,
         _from_maildir: &Maildir,
         _to_maildir: &Maildir,
-    ) -> Result<(), ()> {
+    ) -> Result<(), MaildirArchiverError> {
         Ok(())
     }
 }
@@ -173,14 +191,13 @@ impl MaildirArchiver for MoveMaildirArchiver {
         mail: &MailEntry,
         from_maildir: &Maildir,
         to_maildir: &Maildir,
-    ) -> Result<(), ()> {
-        let mut file = File::open(mail.path()).unwrap();
+    ) -> Result<(), MaildirArchiverError> {
+        let mut file = File::open(mail.path())?;
         let mut buff = Vec::<u8>::new();
-        file.read_to_end(&mut buff).unwrap();
+        file.read_to_end(&mut buff)?;
         to_maildir
-            .store_cur_with_flags(&buff, mail.flags())
-            .unwrap();
-        from_maildir.delete(mail.id()).unwrap();
+            .store_cur_with_flags(&buff, mail.flags())?;
+        from_maildir.delete(mail.id())?;
         Ok(())
     }
 }
@@ -193,13 +210,12 @@ impl MaildirArchiver for CopyMaildirArchiver {
         mail: &MailEntry,
         _from_maildir: &Maildir,
         to_maildir: &Maildir,
-    ) -> Result<(), ()> {
-        let mut file = File::open(mail.path()).unwrap();
+    ) -> Result<(), MaildirArchiverError> {
+        let mut file = File::open(mail.path())?;
         let mut buff = Vec::<u8>::new();
-        file.read_to_end(&mut buff).unwrap();
+        file.read_to_end(&mut buff)?;
         to_maildir
-            .store_cur_with_flags(&buff, mail.flags())
-            .unwrap();
+            .store_cur_with_flags(&buff, mail.flags())?;
         Ok(())
     }
 }
