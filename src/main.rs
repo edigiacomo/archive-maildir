@@ -90,11 +90,9 @@ fn parse_args() -> ProgramOptions {
                 .short("b")
                 .long("before")
                 .value_name("YYYY-mm-dd")
-                .validator(|v| {
-                    match NaiveDate::parse_from_str(&v, "%Y-%m-%d") {
-                        Ok(_)  => Ok(()),
-                        Err(e) => Err(format!("{}", e)),
-                    }
+                .validator(|v| match NaiveDate::parse_from_str(&v, "%Y-%m-%d") {
+                    Ok(_) => Ok(()),
+                    Err(e) => Err(format!("{}", e)),
                 })
                 .help("Archive emails before the given date"),
         )
@@ -116,10 +114,7 @@ fn parse_args() -> ProgramOptions {
     let p = ProgramOptions {
         input_path: matches.value_of("PATH").unwrap().into(),
         output_dir: matches.value_of("output-dir").unwrap().into(),
-        before: matches
-            .value_of("before")
-            .map(|s| s.to_string())
-            .or(None),
+        before: matches.value_of("before").map(|s| s.to_string()).or(None),
         prefix: matches.value_of("prefix").unwrap().into(),
         suffix: matches.value_of("suffix").unwrap().into(),
         split_by: match matches.value_of("split-by").unwrap() {
@@ -195,8 +190,7 @@ impl MaildirArchiver for MoveMaildirArchiver {
         let mut file = File::open(mail.path())?;
         let mut buff = Vec::<u8>::new();
         file.read_to_end(&mut buff)?;
-        to_maildir
-            .store_cur_with_flags(&buff, mail.flags())?;
+        to_maildir.store_cur_with_flags(&buff, mail.flags())?;
         from_maildir.delete(mail.id())?;
         Ok(())
     }
@@ -214,8 +208,7 @@ impl MaildirArchiver for CopyMaildirArchiver {
         let mut file = File::open(mail.path())?;
         let mut buff = Vec::<u8>::new();
         file.read_to_end(&mut buff)?;
-        to_maildir
-            .store_cur_with_flags(&buff, mail.flags())?;
+        to_maildir.store_cur_with_flags(&buff, mail.flags())?;
         Ok(())
     }
 }
@@ -242,13 +235,11 @@ fn main() {
         }),
         None => {
             let now = Utc::now().naive_utc().date();
-            now.clone()
-                .with_year(now.year() - 1)
-                .unwrap_or_else(|| {
-                    error!("While processing time threshold");
-                    std::process::exit(1);
-                })
-        },
+            now.clone().with_year(now.year() - 1).unwrap_or_else(|| {
+                error!("While processing time threshold");
+                std::process::exit(1);
+            })
+        }
     };
     let mail_archiver = create_mail_archiver(opts.archive_mode);
     info!(
