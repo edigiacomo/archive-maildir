@@ -1,23 +1,17 @@
+use archive_maildir::archiver::*;
+
+use maildir::Maildir;
 use chrono::Datelike;
 use chrono::{NaiveDate, NaiveDateTime, Utc};
 use clap::{App, Arg};
 use log::{debug, error, info, LevelFilter};
-use maildir::{MailEntry, Maildir};
 use simple_logger::SimpleLogger;
-use std::fs::File;
-use std::io::Read;
 use std::path::PathBuf;
 
 enum SplitBy {
     Year,
     Day,
     Month,
-}
-
-enum ArchiveMode {
-    Move,
-    Copy,
-    DryRun,
 }
 
 struct ProgramOptions {
@@ -136,89 +130,6 @@ fn parse_args() -> ProgramOptions {
         },
     };
     p
-}
-
-#[derive(Debug)]
-enum MaildirArchiverError {
-    IoError(std::io::Error),
-    MaildirError(maildir::MaildirError),
-}
-
-impl From<std::io::Error> for MaildirArchiverError {
-    fn from(value: std::io::Error) -> Self {
-        MaildirArchiverError::IoError(value)
-    }
-}
-
-impl From<maildir::MaildirError> for MaildirArchiverError {
-    fn from(value: maildir::MaildirError) -> Self {
-        MaildirArchiverError::MaildirError(value)
-    }
-}
-
-trait MaildirArchiver {
-    fn archive_email(
-        &self,
-        mail: &MailEntry,
-        from_maildir: &Maildir,
-        to_maildir: &Maildir,
-    ) -> Result<(), MaildirArchiverError>;
-}
-
-struct DryRunMaildirArchiver {}
-
-impl MaildirArchiver for DryRunMaildirArchiver {
-    fn archive_email(
-        &self,
-        _mail: &MailEntry,
-        _from_maildir: &Maildir,
-        _to_maildir: &Maildir,
-    ) -> Result<(), MaildirArchiverError> {
-        Ok(())
-    }
-}
-
-struct MoveMaildirArchiver {}
-
-impl MaildirArchiver for MoveMaildirArchiver {
-    fn archive_email(
-        &self,
-        mail: &MailEntry,
-        from_maildir: &Maildir,
-        to_maildir: &Maildir,
-    ) -> Result<(), MaildirArchiverError> {
-        let mut file = File::open(mail.path())?;
-        let mut buff = Vec::<u8>::new();
-        file.read_to_end(&mut buff)?;
-        to_maildir.store_cur_with_flags(&buff, mail.flags())?;
-        from_maildir.delete(mail.id())?;
-        Ok(())
-    }
-}
-
-struct CopyMaildirArchiver {}
-
-impl MaildirArchiver for CopyMaildirArchiver {
-    fn archive_email(
-        &self,
-        mail: &MailEntry,
-        _from_maildir: &Maildir,
-        to_maildir: &Maildir,
-    ) -> Result<(), MaildirArchiverError> {
-        let mut file = File::open(mail.path())?;
-        let mut buff = Vec::<u8>::new();
-        file.read_to_end(&mut buff)?;
-        to_maildir.store_cur_with_flags(&buff, mail.flags())?;
-        Ok(())
-    }
-}
-
-fn create_mail_archiver(mode: ArchiveMode) -> Box<dyn MaildirArchiver> {
-    match mode {
-        ArchiveMode::DryRun => Box::new(DryRunMaildirArchiver {}),
-        ArchiveMode::Move => Box::new(MoveMaildirArchiver {}),
-        ArchiveMode::Copy => Box::new(CopyMaildirArchiver {}),
-    }
 }
 
 fn main() {
