@@ -236,7 +236,10 @@ fn main() {
         .unwrap();
     let before = match opts.before {
         // NOTE: the value is already validated
-        Some(s) => NaiveDate::parse_from_str(&s, "%Y-%m-%d").unwrap(),
+        Some(s) => NaiveDate::parse_from_str(&s, "%Y-%m-%d").unwrap_or_else(|e| {
+            error!("While parsing time threshold: {}", e);
+            std::process::exit(1);
+        }),
         None => {
             let now = Utc::now().naive_utc().date();
             now.clone()
