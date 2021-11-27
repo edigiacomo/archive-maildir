@@ -23,7 +23,13 @@ pub enum SplitBy {
     None,
 }
 
+fn one_year_ago() -> NaiveDate {
+    let now = Utc::now().naive_utc().date();
+    now.clone().with_year(now.year() - 1).unwrap()
+}
+
 pub fn parse_args() -> ProgramOptions {
+    let before_default = &(one_year_ago().to_string());
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
@@ -73,6 +79,7 @@ pub fn parse_args() -> ProgramOptions {
             Arg::with_name("before")
                 .short("b")
                 .long("before")
+                .default_value(&before_default)
                 .value_name("YYYY-mm-dd")
                 .help("Archive emails before the given date"),
         )
@@ -102,12 +109,7 @@ pub fn parse_args() -> ProgramOptions {
     let p = ProgramOptions {
         input_maildir: matches.value_of("input-maildir").unwrap().into(),
         output_dir: matches.value_of("output-dir").unwrap().into(),
-        before: if matches.is_present("before") {
-            value_t_or_exit!(matches, "before", NaiveDate)
-        } else {
-            let now = Utc::now().naive_utc().date();
-            now.clone().with_year(now.year() - 1).unwrap()
-        },
+        before: value_t_or_exit!(matches, "before", NaiveDate),
         prefix: matches.value_of("prefix").unwrap().into(),
         suffix: matches.value_of("suffix").unwrap().into(),
         split_by: match matches.value_of("split-by").unwrap() {
