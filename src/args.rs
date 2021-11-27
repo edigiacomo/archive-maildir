@@ -1,13 +1,13 @@
 use crate::archiver::*;
-use chrono::NaiveDate;
-use clap::{App, Arg};
+use chrono::{Datelike, NaiveDate, Utc};
+use clap::{value_t_or_exit, App, Arg};
 use log::LevelFilter;
 use maildir::Maildir;
 use std::path::PathBuf;
 
 pub struct ProgramOptions {
-    pub input_path: Maildir,
-    pub before: Option<String>,
+    pub input_maildir: Maildir,
+    pub before: NaiveDate,
     pub output_dir: PathBuf,
     pub archive_mode: ArchiveMode,
     pub prefix: String,
@@ -26,16 +26,7 @@ pub fn parse_args() -> ProgramOptions {
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
-        .about("Archive emails from maildir")
-        .arg(
-            Arg::with_name("output-dir")
-                .short("o")
-                .long("output-dir")
-                .value_name("PATH")
-                .help("Output directory")
-                .takes_value(true)
-                .default_value("."),
-        )
+        .about("Archive emails from maildir, grouping them by date")
         .arg(
             Arg::with_name("prefix")
                 .short("p")
@@ -59,7 +50,7 @@ pub fn parse_args() -> ProgramOptions {
                 .short("S")
                 .long("split-by")
                 .value_name("PERIOD")
-                .help("Split by")
+                .help("Set the split policy")
                 .takes_value(true)
                 .possible_value("year")
                 .possible_value("month")
@@ -81,10 +72,6 @@ pub fn parse_args() -> ProgramOptions {
                 .short("b")
                 .long("before")
                 .value_name("YYYY-mm-dd")
-                .validator(|v| match NaiveDate::parse_from_str(&v, "%Y-%m-%d") {
-                    Ok(_) => Ok(()),
-                    Err(e) => Err(format!("{}", e)),
-                })
                 .help("Archive emails before the given date"),
         )
         .arg(
@@ -96,16 +83,29 @@ pub fn parse_args() -> ProgramOptions {
                 .takes_value(false),
         )
         .arg(
-            Arg::with_name("PATH")
+            Arg::with_name("input-maildir")
                 .required(true)
-                .help("Maildir path")
+                .value_name("INPUT_PATH")
+                .help("Input maildir path")
                 .index(1),
+        )
+        .arg(
+            Arg::with_name("output-dir")
+                .required(true)
+                .value_name("OUTPUT_PATH")
+                .help("Output directory for archive maildirs")
+                .index(2)
         )
         .get_matches();
     let p = ProgramOptions {
-        input_path: matches.value_of("PATH").unwrap().into(),
+        input_maildir: matches.value_of("input-maildir").unwrap().into(),
         output_dir: matches.value_of("output-dir").unwrap().into(),
-        before: matches.value_of("before").map(|s| s.to_string()).or(None),
+        before: if matches.is_present("before") {
+            value_t_or_exit!(matches, "before", NaiveDate)
+        } else {
+            let now = Utc::now().naive_utc().date();
+            now.clone().with_year(now.year() - 1).unwrap()
+        },
         prefix: matches.value_of("prefix").unwrap().into(),
         suffix: matches.value_of("suffix").unwrap().into(),
         split_by: match matches.value_of("split-by").unwrap() {
