@@ -1,11 +1,22 @@
 use maildir::{MailEntry, Maildir};
 use std::fs::File;
 use std::io::Read;
+use std::fmt;
 
 #[derive(Debug)]
 pub enum MaildirArchiverError {
     IoError(std::io::Error),
     MaildirError(maildir::MaildirError),
+}
+
+impl fmt::Display for MaildirArchiverError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let msg = match self {
+            MaildirArchiverError::IoError(e) => format!("{}", e),
+            MaildirArchiverError::MaildirError(e) => format!("{}", e),
+        };
+        write!(f, "{}", msg)
+    }
 }
 
 impl From<std::io::Error> for MaildirArchiverError {
