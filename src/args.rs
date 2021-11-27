@@ -20,6 +20,7 @@ pub enum SplitBy {
     Year,
     Day,
     Month,
+    None,
 }
 
 pub fn parse_args() -> ProgramOptions {
@@ -55,6 +56,7 @@ pub fn parse_args() -> ProgramOptions {
                 .possible_value("year")
                 .possible_value("month")
                 .possible_value("day")
+                .possible_value("none")
                 .default_value("year"),
         )
         .arg(
@@ -111,7 +113,8 @@ pub fn parse_args() -> ProgramOptions {
         split_by: match matches.value_of("split-by").unwrap() {
             "day" => SplitBy::Day,
             "month" => SplitBy::Month,
-            _ => SplitBy::Year,
+            "year" => SplitBy::Year,
+            _  => SplitBy::None,
         },
         verbosity: match matches.occurrences_of("verbose") {
             0 => LevelFilter::Off,

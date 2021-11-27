@@ -40,6 +40,7 @@ fn main() {
                                         SplitBy::Year => "%Y",
                                         SplitBy::Month => "%Y-%m",
                                         SplitBy::Day => "%Y-%m-%d",
+                                        SplitBy::None => "",
                                     }),
                                     opts.suffix
                             ));
