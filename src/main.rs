@@ -19,7 +19,8 @@ fn main() {
         opts.input_maildir.path().display(),
         opts.before
     );
-    opts.input_maildir.list_cur()
+    opts.input_maildir
+        .list_cur()
         .filter_map(|entry| match entry {
             Ok(m) => Some(m),
             Err(e) => {
@@ -27,25 +28,33 @@ fn main() {
                 None
             }
         })
-    .filter_map(|mut mail| match mail.received() {
-        Ok(timestamp) => Some((mail, NaiveDateTime::from_timestamp(timestamp))),
-        Err(e) => {
-            error!("{}", e);
-            None
-        }
-    })
-    .filter(|(mail, maildate)| {
-        if maildate.date() < opts.before {
-            debug!("Email {} with timestamp {} is older than threshold", mail.id(), maildate);
-            true
-        } else {
-            debug!("Email {} with timestamp {} is newer than threshold", mail.id(), maildate);
-            false
-        }
-    })
-    .for_each(|(mail, maildate)| {
-        let mut output_folder = PathBuf::from(&opts.output_dir);
-        output_folder.push(format!(
+        .filter_map(|mut mail| match mail.received() {
+            Ok(timestamp) => Some((mail, NaiveDateTime::from_timestamp(timestamp, 0))),
+            Err(e) => {
+                error!("{}", e);
+                None
+            }
+        })
+        .filter(|(mail, maildate)| {
+            if maildate.date() < opts.before {
+                debug!(
+                    "Email {} with timestamp {} is older than threshold",
+                    mail.id(),
+                    maildate
+                );
+                true
+            } else {
+                debug!(
+                    "Email {} with timestamp {} is newer than threshold",
+                    mail.id(),
+                    maildate
+                );
+                false
+            }
+        })
+        .for_each(|(mail, maildate)| {
+            let mut output_folder = PathBuf::from(&opts.output_dir);
+            output_folder.push(format!(
                 "{}{}{}",
                 opts.prefix,
                 maildate.format(match opts.split_by {
@@ -55,18 +64,18 @@ fn main() {
                     SplitBy::None => "",
                 }),
                 opts.suffix
-        ));
-        let to_maildir = Maildir::from(output_folder);
-        to_maildir.create_dirs().unwrap();
-        info!(
-            "Archiving email {} from folder {} to folder {}",
-            mail.id(),
-            opts.input_maildir.path().display(),
-            to_maildir.path().display()
-        );
-        match mail_archiver.archive_email(&mail, &opts.input_maildir, &to_maildir) {
-            Err(e) => error!("{}", e),
-            _ => {},
-        }
-    });
+            ));
+            let to_maildir = Maildir::from(output_folder);
+            to_maildir.create_dirs().unwrap();
+            info!(
+                "Archiving email {} from folder {} to folder {}",
+                mail.id(),
+                opts.input_maildir.path().display(),
+                to_maildir.path().display()
+            );
+            match mail_archiver.archive_email(&mail, &opts.input_maildir, &to_maildir) {
+                Err(e) => error!("{}", e),
+                _ => {}
+            }
+        });
 }
