@@ -107,11 +107,12 @@ pub fn parse_args() -> ProgramOptions {
         )
         .get_matches();
     let p = ProgramOptions {
-        input_maildir: matches.value_of("input-maildir").unwrap().into(),
-        output_dir: matches.value_of("output-dir").unwrap().into(),
+        // Unfortunately, Maildir doesn't implement trait FromStr
+        input_maildir: value_t_or_exit!(matches, "input-maildir", String).into(),
+        output_dir: value_t_or_exit!(matches, "output-dir", PathBuf),
         before: value_t_or_exit!(matches, "before", NaiveDate),
-        prefix: matches.value_of("prefix").unwrap().into(),
-        suffix: matches.value_of("suffix").unwrap().into(),
+        prefix: value_t_or_exit!(matches, "prefix", String),
+        suffix: value_t_or_exit!(matches, "suffix", String),
         split_by: match matches.value_of("split-by").unwrap() {
             "day" => SplitBy::Day,
             "month" => SplitBy::Month,
