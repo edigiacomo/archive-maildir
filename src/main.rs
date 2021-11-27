@@ -15,14 +15,18 @@ fn main() {
         .unwrap();
     let mail_archiver = create_mail_archiver(opts.archive_mode);
     info!(
-        "Archiving emails in maildir {} older than {}",
+        "Archiving emails older than {}",
         opts.input_maildir.path().display(),
-        opts.before
     );
+    let maildir_size = opts.input_maildir.count_cur();
     opts.input_maildir
         .list_cur()
-        .filter_map(|entry| match entry {
-            Ok(m) => Some(m),
+        .enumerate()
+        .filter_map(|(index, entry)| match entry {
+            Ok(m) => {
+                debug!("{}/{} email {}", index, maildir_size, m.id());
+                Some(m)
+            },
             Err(e) => {
                 error!("{}", e);
                 None
