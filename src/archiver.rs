@@ -214,5 +214,3 @@ mod tests {
         assert_eq!(maildir.output_maildir.count_cur(), 0);
     }
 }
-
-
