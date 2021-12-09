@@ -77,9 +77,8 @@ fn main() {
                 opts.input_maildir.path().display(),
                 to_maildir.path().display()
             );
-            match mail_archiver.archive_email(&mail, &opts.input_maildir, &to_maildir) {
-                Err(e) => error!("{}", e),
-                _ => {}
+            if let Err(e) = mail_archiver.archive_email(&mail, &opts.input_maildir, &to_maildir) {
+                error!("{}", e);
             }
         });
 }
