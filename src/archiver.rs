@@ -152,10 +152,7 @@ mod tests {
 
         let maildir = MaildirRaii::new();
         let archiver = MoveMaildirArchiver {};
-        let mail = match maildir.input_maildir.list_cur().next() {
-            Some(Ok(m)) => m,
-            _ => panic!("Something terrible"),
-        };
+        let mail = maildir.input_maildir.list_cur().next().unwrap().unwrap();
 
         assert_eq!(maildir.input_maildir.count_cur(), 1);
         assert_eq!(maildir.output_maildir.count_cur(), 0);
@@ -175,10 +172,7 @@ mod tests {
 
         let maildir = MaildirRaii::new();
         let archiver = CopyMaildirArchiver {};
-        let mail = match maildir.input_maildir.list_cur().next() {
-            Some(Ok(m)) => m,
-            _ => panic!("Something terrible"),
-        };
+        let mail = maildir.input_maildir.list_cur().next().unwrap().unwrap();
 
         assert_eq!(maildir.input_maildir.count_cur(), 1);
         assert_eq!(maildir.output_maildir.count_cur(), 0);
@@ -198,10 +192,7 @@ mod tests {
 
         let maildir = MaildirRaii::new();
         let archiver = DryRunMaildirArchiver {};
-        let mail = match maildir.input_maildir.list_cur().next() {
-            Some(Ok(m)) => m,
-            _ => panic!("Something terrible"),
-        };
+        let mail = maildir.input_maildir.list_cur().next().unwrap().unwrap();
 
         assert_eq!(maildir.input_maildir.count_cur(), 1);
         assert_eq!(maildir.output_maildir.count_cur(), 0);
