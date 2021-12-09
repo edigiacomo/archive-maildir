@@ -29,7 +29,7 @@ fn one_year_ago() -> NaiveDate {
 }
 
 pub fn parse_args() -> ProgramOptions {
-    let before_default = &(one_year_ago().to_string());
+    let before_default = one_year_ago().to_string();
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
