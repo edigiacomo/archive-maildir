@@ -7,20 +7,23 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install toolchain
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: rustfmt, clippy
-      - name: Cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-      - uses: actions-rs/install@v0.1
+          components: rustfmt, clippy, cargo-audit
+      - name: Install cargo-audit
+        uses: actions-rs/install@v0.1
         with:
           crate: cargo-audit
           version: latest
           use-tool-cache: true
+      - name: Cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
       - name: Annotate commit with clippy warnings
         uses: actions-rs/clippy-check@v1
         with:
