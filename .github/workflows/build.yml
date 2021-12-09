@@ -12,6 +12,10 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt, clippy
+      - name: Cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
       - uses: actions-rs/install@v0.1
         with:
           crate: cargo-audit
@@ -26,7 +30,3 @@ jobs:
         uses: actions-rs/audit-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
