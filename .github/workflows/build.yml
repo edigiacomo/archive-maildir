@@ -3,8 +3,8 @@ on: [push]
 name: CI
 
 jobs:
-  test:
-    name: Build
+  check:
+    name: Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -12,24 +12,46 @@ jobs:
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
+          profile: minimal
           toolchain: stable
-          components: rustfmt, clippy
-      - name: Install cargo-audit
-        uses: actions-rs/install@v0.1
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
         with:
-          crate: cargo-audit
-          version: latest
-          use-tool-cache: true
-      - name: Cargo test
+          command: check
+  test:
+    name: Run test suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
           command: test
-      - name: Annotate commit with clippy warnings
-        uses: actions-rs/clippy-check@v1
+  lint:
+    name: Run linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
-      - name: Security audit
-        uses: actions-rs/audit-check@v1
+          profile: minimal
+          toolchain: stable
+          components: rustfmt, clippy
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          command: fmt
+          args: --all -- --check
+      - name: Run cargo clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
