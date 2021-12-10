@@ -1,7 +1,7 @@
 use maildir::{MailEntry, Maildir};
+use std::fmt;
 use std::fs::File;
 use std::io::Read;
-use std::fmt;
 
 #[derive(Debug)]
 pub enum MaildirArchiverError {
@@ -104,8 +104,8 @@ pub fn create_mail_archiver(mode: ArchiveMode) -> Box<dyn MaildirArchiver> {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
     use maildir::Maildir;
+    use std::path::PathBuf;
 
     struct MaildirRaii {
         basedir: PathBuf,
@@ -127,7 +127,8 @@ mod tests {
             std::fs::copy(
                 format!("testdata/maildir1/cur/{}", filename),
                 input_maildir.path().join("cur").join(filename),
-            ).unwrap();
+            )
+            .unwrap();
 
             MaildirRaii {
                 basedir: basedir,
@@ -139,16 +140,14 @@ mod tests {
 
     impl Drop for MaildirRaii {
         fn drop(&mut self) {
-            std::fs::remove_dir_all(
-                &self.basedir
-            ).unwrap();
+            std::fs::remove_dir_all(&self.basedir).unwrap();
         }
     }
 
     #[test]
     fn test_move_archive_email() {
-        use crate::archiver::MoveMaildirArchiver;
         use crate::archiver::MaildirArchiver;
+        use crate::archiver::MoveMaildirArchiver;
 
         let maildir = MaildirRaii::new();
         let archiver = MoveMaildirArchiver {};
@@ -156,11 +155,9 @@ mod tests {
 
         assert_eq!(maildir.input_maildir.count_cur(), 1);
         assert_eq!(maildir.output_maildir.count_cur(), 0);
-        archiver.archive_email(
-            &mail,
-            &maildir.input_maildir,
-            &maildir.output_maildir,
-        ).unwrap();
+        archiver
+            .archive_email(&mail, &maildir.input_maildir, &maildir.output_maildir)
+            .unwrap();
         assert_eq!(maildir.input_maildir.count_cur(), 0);
         assert_eq!(maildir.output_maildir.count_cur(), 1);
     }
@@ -176,11 +173,9 @@ mod tests {
 
         assert_eq!(maildir.input_maildir.count_cur(), 1);
         assert_eq!(maildir.output_maildir.count_cur(), 0);
-        archiver.archive_email(
-            &mail,
-            &maildir.input_maildir,
-            &maildir.output_maildir,
-        ).unwrap();
+        archiver
+            .archive_email(&mail, &maildir.input_maildir, &maildir.output_maildir)
+            .unwrap();
         assert_eq!(maildir.input_maildir.count_cur(), 1);
         assert_eq!(maildir.output_maildir.count_cur(), 1);
     }
@@ -196,11 +191,9 @@ mod tests {
 
         assert_eq!(maildir.input_maildir.count_cur(), 1);
         assert_eq!(maildir.output_maildir.count_cur(), 0);
-        archiver.archive_email(
-            &mail,
-            &maildir.input_maildir,
-            &maildir.output_maildir,
-        ).unwrap();
+        archiver
+            .archive_email(&mail, &maildir.input_maildir, &maildir.output_maildir)
+            .unwrap();
         assert_eq!(maildir.input_maildir.count_cur(), 1);
         assert_eq!(maildir.output_maildir.count_cur(), 0);
     }

@@ -103,7 +103,7 @@ pub fn parse_args() -> ProgramOptions {
                 .required(true)
                 .value_name("OUTPUT_PATH")
                 .help("Output directory for archive maildirs")
-                .index(2)
+                .index(2),
         )
         .get_matches();
     let p = ProgramOptions {
@@ -117,7 +117,7 @@ pub fn parse_args() -> ProgramOptions {
             "day" => SplitBy::Day,
             "month" => SplitBy::Month,
             "year" => SplitBy::Year,
-            _  => SplitBy::None,
+            _ => SplitBy::None,
         },
         verbosity: match matches.occurrences_of("verbose") {
             0 => LevelFilter::Off,

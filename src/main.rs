@@ -26,7 +26,7 @@ fn main() {
             Ok(m) => {
                 debug!("{}/{} email {}", index, maildir_size, m.id());
                 Some(m)
-            },
+            }
             Err(e) => {
                 error!("{}", e);
                 None
