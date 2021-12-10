@@ -13,7 +13,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: rustfmt, clippy, cargo-audit
+          components: rustfmt, clippy
       - name: Install cargo-audit
         uses: actions-rs/install@v0.1
         with:
