@@ -31,6 +31,9 @@ impl From<maildir::MaildirError> for MaildirArchiverError {
     }
 }
 
+/// Trait implemented by the mail archiver.
+///
+/// The function [`MaildirArchiver::archive_email`] is generally used in a loop.
 pub trait MaildirArchiver {
     fn archive_email(
         &self,
@@ -40,6 +43,7 @@ pub trait MaildirArchiver {
     ) -> Result<(), MaildirArchiverError>;
 }
 
+/// Dry run archiver
 struct DryRunMaildirArchiver {}
 
 impl MaildirArchiver for DryRunMaildirArchiver {
@@ -53,6 +57,7 @@ impl MaildirArchiver for DryRunMaildirArchiver {
     }
 }
 
+/// Archiver that move email from one maildir to another
 struct MoveMaildirArchiver {}
 
 impl MaildirArchiver for MoveMaildirArchiver {
@@ -71,6 +76,7 @@ impl MaildirArchiver for MoveMaildirArchiver {
     }
 }
 
+/// Archiver that copy email from one maildir to another
 struct CopyMaildirArchiver {}
 
 impl MaildirArchiver for CopyMaildirArchiver {
@@ -94,6 +100,7 @@ pub enum ArchiveMode {
     DryRun,
 }
 
+/// Factory method that creates an archiver
 pub fn create_mail_archiver(mode: ArchiveMode) -> Box<dyn MaildirArchiver> {
     match mode {
         ArchiveMode::DryRun => Box::new(DryRunMaildirArchiver {}),
