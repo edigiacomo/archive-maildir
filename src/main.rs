@@ -70,7 +70,6 @@ fn main() {
                 opts.suffix
             ));
             let to_maildir = Maildir::from(output_folder);
-            to_maildir.create_dirs().unwrap();
             info!(
                 "Archiving email {} from folder {} to folder {}",
                 mail.id(),

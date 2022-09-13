@@ -69,6 +69,8 @@ impl MaildirArchiver for MoveMaildirArchiver {
     ) -> Result<(), MaildirArchiverError> {
         let mut file = File::open(mail.path())?;
         let mut buff = Vec::<u8>::new();
+
+        to_maildir.create_dirs()?;
         file.read_to_end(&mut buff)?;
         to_maildir.store_cur_with_flags(&buff, mail.flags())?;
         from_maildir.delete(mail.id())?;
@@ -88,6 +90,8 @@ impl MaildirArchiver for CopyMaildirArchiver {
     ) -> Result<(), MaildirArchiverError> {
         let mut file = File::open(mail.path())?;
         let mut buff = Vec::<u8>::new();
+
+        to_maildir.create_dirs()?;
         file.read_to_end(&mut buff)?;
         to_maildir.store_cur_with_flags(&buff, mail.flags())?;
         Ok(())
@@ -128,7 +132,6 @@ mod tests {
             let input_maildir = Maildir::from(basedir.join("in"));
             let output_maildir = Maildir::from(basedir.join("out"));
             input_maildir.create_dirs().unwrap();
-            output_maildir.create_dirs().unwrap();
 
             let filename = "1463868505.38518452d49213cb409aa1db32f53184:2,S";
             std::fs::copy(
@@ -166,6 +169,7 @@ mod tests {
             .archive_email(&mail, &maildir.input_maildir, &maildir.output_maildir)
             .unwrap();
         assert_eq!(maildir.input_maildir.count_cur(), 0);
+        assert!(maildir.output_maildir.path().exists());
         assert_eq!(maildir.output_maildir.count_cur(), 1);
     }
 
@@ -184,6 +188,7 @@ mod tests {
             .archive_email(&mail, &maildir.input_maildir, &maildir.output_maildir)
             .unwrap();
         assert_eq!(maildir.input_maildir.count_cur(), 1);
+        assert!(maildir.output_maildir.path().exists());
         assert_eq!(maildir.output_maildir.count_cur(), 1);
     }
 
@@ -202,6 +207,6 @@ mod tests {
             .archive_email(&mail, &maildir.input_maildir, &maildir.output_maildir)
             .unwrap();
         assert_eq!(maildir.input_maildir.count_cur(), 1);
-        assert_eq!(maildir.output_maildir.count_cur(), 0);
+        assert!(!maildir.output_maildir.path().exists());
     }
 }
