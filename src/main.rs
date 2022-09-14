@@ -33,7 +33,9 @@ fn main() {
             }
         })
         .filter_map(|mut mail| match mail.received() {
-            Ok(timestamp) => Some((mail, NaiveDateTime::from_timestamp(timestamp, 0))),
+            Ok(timestamp) => {
+                NaiveDateTime::from_timestamp_opt(timestamp, 0).and_then(|dt| Some((mail, dt)))
+            }
             Err(e) => {
                 error!("{}", e);
                 None
