@@ -1,6 +1,6 @@
 use crate::archiver::*;
 use chrono::{Datelike, NaiveDate, Utc};
-use clap::{value_t_or_exit, App, Arg};
+use clap::{Command, value_t_or_exit, Arg};
 use log::LevelFilter;
 use maildir::Maildir;
 use std::path::PathBuf;
@@ -30,13 +30,13 @@ fn one_year_ago() -> NaiveDate {
 
 pub fn parse_args() -> ProgramOptions {
     let before_default = one_year_ago().to_string();
-    let matches = App::new(env!("CARGO_PKG_NAME"))
+    let matches = Command::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .about("Archive emails from maildir, grouping them by date")
         .arg(
-            Arg::with_name("prefix")
-                .short("p")
+            Arg::new("prefix")
+                .short('p')
                 .long("prefix")
                 .value_name("PREFIX")
                 .help("Prefix format")
@@ -44,8 +44,8 @@ pub fn parse_args() -> ProgramOptions {
                 .default_value(""),
         )
         .arg(
-            Arg::with_name("suffix")
-                .short("s")
+            Arg::new("suffix")
+                .short('s')
                 .long("suffix")
                 .value_name("SUFFIX")
                 .help("Suffix format")
@@ -53,8 +53,8 @@ pub fn parse_args() -> ProgramOptions {
                 .default_value(""),
         )
         .arg(
-            Arg::with_name("split-by")
-                .short("S")
+            Arg::new("split-by")
+                .short('S')
                 .long("split-by")
                 .value_name("PERIOD")
                 .help("Set the split policy")
@@ -66,8 +66,8 @@ pub fn parse_args() -> ProgramOptions {
                 .default_value("year"),
         )
         .arg(
-            Arg::with_name("mode")
-                .short("m")
+            Arg::new("mode")
+                .short('m')
                 .long("mode")
                 .help("Archive mode")
                 .possible_value("copy")
@@ -76,30 +76,30 @@ pub fn parse_args() -> ProgramOptions {
                 .default_value("dry-run"),
         )
         .arg(
-            Arg::with_name("before")
-                .short("b")
+            Arg::new("before")
+                .short('b')
                 .long("before")
                 .default_value(&before_default)
                 .value_name("YYYY-mm-dd")
                 .help("Archive emails before the given date"),
         )
         .arg(
-            Arg::with_name("verbose")
-                .short("v")
+            Arg::new("verbose")
+                .short('v')
                 .long("verbose")
                 .help("Set verbosity")
                 .multiple(true)
                 .takes_value(false),
         )
         .arg(
-            Arg::with_name("input-maildir")
+            Arg::new("input-maildir")
                 .required(true)
                 .value_name("INPUT_PATH")
                 .help("Input maildir path")
                 .index(1),
         )
         .arg(
-            Arg::with_name("output-dir")
+            Arg::new("output-dir")
                 .required(true)
                 .value_name("OUTPUT_PATH")
                 .help("Output directory for archive maildirs")
