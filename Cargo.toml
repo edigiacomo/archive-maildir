@@ -8,8 +8,8 @@ authors = ["Emanuele Di Giacomo <emanuele@digiacomo.cc>"]
 
 [dependencies]
 clap = "3"
-maildir = "0.5"
-chrono = "0.4"
-log = "0.4"
-simple_logger = "1.13"
-mktemp = "0.4"
+maildir = "0"
+chrono = "0"
+log = "0"
+simple_logger = "2"
+mktemp = "0"
