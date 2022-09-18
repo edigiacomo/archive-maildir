@@ -1,6 +1,6 @@
 use crate::archiver::*;
 use chrono::{Datelike, NaiveDate, Utc};
-use clap::{Command, value_t_or_exit, Arg};
+use clap::{value_t_or_exit, Arg, Command};
 use log::LevelFilter;
 use maildir::Maildir;
 use std::path::PathBuf;
