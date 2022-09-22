@@ -19,7 +19,7 @@ fn main() {
         opts.input_maildir.path().display(),
     );
     let maildir_size = opts.input_maildir.count_cur();
-    opts.input_maildir
+    let archived = opts.input_maildir
         .list_cur()
         .enumerate()
         .filter_map(|(index, entry)| match entry {
@@ -56,7 +56,7 @@ fn main() {
                 false
             }
         })
-        .for_each(|(mail, maildate)| {
+        .filter_map(|(mail, maildate)| {
             let mut output_folder = PathBuf::from(&opts.output_dir);
             output_folder.push(format!(
                 "{}{}{}",
@@ -70,14 +70,18 @@ fn main() {
                 opts.suffix
             ));
             let to_maildir = Maildir::from(output_folder);
-            info!(
-                "Archiving email {} from folder {} to folder {}",
-                mail.id(),
-                opts.input_maildir.path().display(),
-                to_maildir.path().display()
-            );
-            if let Err(e) = mail_archiver.archive_email(&mail, &opts.input_maildir, &to_maildir) {
-                error!("{}", e);
+            match mail_archiver.archive_email(&mail, &opts.input_maildir, &to_maildir) {
+                Err(e) => {
+                    error!("Error while archiving email {} from folder {} to folder {}: {}",
+                           mail.id(), opts.input_maildir.path().display(), to_maildir.path().display(), e);
+                    None
+                },
+                Ok(()) => {
+                    info!("Email {} from folder {} archived to folder {}",
+                          mail.id(), opts.input_maildir.path().display(), to_maildir.path().display());
+                    Some((mail.id().to_string(), to_maildir))
+                }
             }
         });
+        info!("Archived {}/{} email", archived.count(), maildir_size);
 }
