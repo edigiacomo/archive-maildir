@@ -25,7 +25,7 @@ fn main() {
         .enumerate()
         .filter_map(|(index, entry)| match entry {
             Ok(m) => {
-                debug!("{}/{} email {}", index, maildir_size, m.id());
+                debug!("{}/{} email {}", index + 1, maildir_size, m.id());
                 Some(m)
             }
             Err(e) => {
