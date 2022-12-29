@@ -26,7 +26,7 @@ pub enum SplitBy {
 
 fn one_year_ago() -> Date {
     let now = OffsetDateTime::now_utc();
-    now.clone().replace_year(now.year() - 1).unwrap().date()
+    now.replace_year(now.year() - 1).unwrap().date()
 }
 
 pub fn parse_args() -> ProgramOptions {
