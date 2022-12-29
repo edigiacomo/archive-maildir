@@ -1,7 +1,8 @@
 use archive_maildir::archiver::*;
 use archive_maildir::args::*;
 
-use chrono::NaiveDateTime;
+use time::OffsetDateTime;
+use time::macros::format_description;
 use log::{debug, error, info};
 use maildir::Maildir;
 use simple_logger::SimpleLogger;
@@ -34,7 +35,7 @@ fn main() {
             }
         })
         .filter_map(|mut mail| match mail.received() {
-            Ok(timestamp) => NaiveDateTime::from_timestamp_opt(timestamp, 0).map(|dt| (mail, dt)),
+            Ok(timestamp) => OffsetDateTime::from_unix_timestamp(timestamp).ok().map(|dt| (mail, dt)),
             Err(e) => {
                 error!("{}", e);
                 None
@@ -59,15 +60,16 @@ fn main() {
         })
         .filter_map(|(mail, maildate)| {
             let mut output_folder = PathBuf::from(&opts.output_dir);
+            let dateformat = match opts.split_by {
+                SplitBy::Year => format_description!("[year]"),
+                SplitBy::Month => format_description!("[year]-[month]"),
+                SplitBy::Day => format_description!("[year]-[month]-[day]"),
+                SplitBy::None => format_description!(""),
+            };
             output_folder.push(format!(
                 "{}{}{}",
                 opts.prefix,
-                maildate.format(match opts.split_by {
-                    SplitBy::Year => "%Y",
-                    SplitBy::Month => "%Y-%m",
-                    SplitBy::Day => "%Y-%m-%d",
-                    SplitBy::None => "",
-                }),
+                maildate.format(&dateformat).unwrap(),
                 opts.suffix
             ));
             let to_maildir = Maildir::from(output_folder);

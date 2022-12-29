@@ -9,7 +9,7 @@ authors = ["Emanuele Di Giacomo <emanuele@digiacomo.cc>"]
 [dependencies]
 clap = "3"
 maildir = "0"
-chrono = "0"
+time = { version = ">=0.2.23", features = ["parsing"] }
 log = "0"
 simple_logger = "2"
 mktemp = "0"

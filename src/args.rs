@@ -1,5 +1,6 @@
 use crate::archiver::*;
-use chrono::{Datelike, NaiveDate, Utc};
+use time::{Date, OffsetDateTime};
+use time::macros::format_description;
 use clap::{value_t_or_exit, Arg, Command};
 use log::LevelFilter;
 use maildir::Maildir;
@@ -7,7 +8,7 @@ use std::path::PathBuf;
 
 pub struct ProgramOptions {
     pub input_maildir: Maildir,
-    pub before: NaiveDate,
+    pub before: Date,
     pub output_dir: PathBuf,
     pub archive_mode: ArchiveMode,
     pub prefix: String,
@@ -23,9 +24,9 @@ pub enum SplitBy {
     None,
 }
 
-fn one_year_ago() -> NaiveDate {
-    let now = Utc::now().naive_utc().date();
-    now.clone().with_year(now.year() - 1).unwrap()
+fn one_year_ago() -> Date {
+    let now = OffsetDateTime::now_utc();
+    now.clone().replace_year(now.year() - 1).unwrap().date()
 }
 
 pub fn parse_args() -> ProgramOptions {
@@ -106,11 +107,12 @@ pub fn parse_args() -> ProgramOptions {
                 .index(2),
         )
         .get_matches();
+    let dateformat = format_description!("[year]-[month]-[day]");
     let p = ProgramOptions {
         // Unfortunately, Maildir doesn't implement trait FromStr
         input_maildir: value_t_or_exit!(matches, "input-maildir", String).into(),
         output_dir: value_t_or_exit!(matches, "output-dir", PathBuf),
-        before: value_t_or_exit!(matches, "before", NaiveDate),
+        before: Date::parse(&value_t_or_exit!(matches, "before", String), &dateformat).unwrap(),
         prefix: value_t_or_exit!(matches, "prefix", String),
         suffix: value_t_or_exit!(matches, "suffix", String),
         split_by: match matches.value_of("split-by").unwrap() {
