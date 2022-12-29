@@ -1,10 +1,10 @@
 use crate::archiver::*;
-use time::{Date, OffsetDateTime};
-use time::macros::format_description;
 use clap::{value_t_or_exit, Arg, Command};
 use log::LevelFilter;
 use maildir::Maildir;
 use std::path::PathBuf;
+use time::macros::format_description;
+use time::{Date, OffsetDateTime};
 
 pub struct ProgramOptions {
     pub input_maildir: Maildir,

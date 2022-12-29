@@ -1,12 +1,12 @@
 use archive_maildir::archiver::*;
 use archive_maildir::args::*;
 
-use time::OffsetDateTime;
-use time::macros::format_description;
 use log::{debug, error, info};
 use maildir::Maildir;
 use simple_logger::SimpleLogger;
 use std::path::PathBuf;
+use time::macros::format_description;
+use time::OffsetDateTime;
 
 fn main() {
     let opts = parse_args();
@@ -35,7 +35,9 @@ fn main() {
             }
         })
         .filter_map(|mut mail| match mail.received() {
-            Ok(timestamp) => OffsetDateTime::from_unix_timestamp(timestamp).ok().map(|dt| (mail, dt)),
+            Ok(timestamp) => OffsetDateTime::from_unix_timestamp(timestamp)
+                .ok()
+                .map(|dt| (mail, dt)),
             Err(e) => {
                 error!("{}", e);
                 None
