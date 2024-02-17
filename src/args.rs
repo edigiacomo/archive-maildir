@@ -1,5 +1,6 @@
 use crate::archiver::*;
-use clap::{value_t_or_exit, Arg, Command};
+use clap::{arg, command, ArgAction};
+use clap::builder::PossibleValue;
 use log::LevelFilter;
 use maildir::Maildir;
 use std::path::PathBuf;
@@ -31,104 +32,102 @@ fn one_year_ago() -> Date {
 
 pub fn parse_args() -> ProgramOptions {
     let before_default = one_year_ago().to_string();
-    let matches = Command::new(env!("CARGO_PKG_NAME"))
+    let matches = command!()
         .version(env!("CARGO_PKG_VERSION"))
-        .author(env!("CARGO_PKG_AUTHORS"))
         .about("Archive emails from maildir, grouping them by date")
         .arg(
-            Arg::new("prefix")
-                .short('p')
-                .long("prefix")
-                .value_name("PREFIX")
-                .help("Prefix format")
-                .takes_value(true)
-                .default_value(""),
+            arg!("prefix")
+            .short('p')
+            .long("prefix")
+            .value_name("PREFIX")
+            .help("Prefix format")
+            .default_value(""),
         )
         .arg(
-            Arg::new("suffix")
-                .short('s')
-                .long("suffix")
-                .value_name("SUFFIX")
-                .help("Suffix format")
-                .takes_value(true)
-                .default_value(""),
+            arg!("suffix")
+            .short('s')
+            .long("suffix")
+            .value_name("SUFFIX")
+            .help("Suffix format")
+            .default_value(""),
         )
         .arg(
-            Arg::new("split-by")
-                .short('S')
-                .long("split-by")
-                .value_name("PERIOD")
-                .help("Set the split policy")
-                .takes_value(true)
-                .possible_value("year")
-                .possible_value("month")
-                .possible_value("day")
-                .possible_value("none")
-                .default_value("year"),
+            arg!("split-by")
+            .short('S')
+            .long("split-by")
+            .value_name("PERIOD")
+            .help("Set the split policy")
+            .value_parser([
+                PossibleValue::new("year"),
+                PossibleValue::new("month"),
+                PossibleValue::new("day"),
+                PossibleValue::new("none"),
+            ])
+            .default_value("year"),
         )
         .arg(
-            Arg::new("mode")
-                .short('m')
-                .long("mode")
-                .help("Archive mode")
-                .possible_value("copy")
-                .possible_value("move")
-                .possible_value("dry-run")
-                .default_value("dry-run"),
+            arg!("mode")
+            .short('m')
+            .long("mode")
+            .help("Archive mode")
+            .value_parser([
+                PossibleValue::new("copy"),
+                PossibleValue::new("move"),
+                PossibleValue::new("dry-run"),
+            ])
+            .default_value("dry-run"),
         )
         .arg(
-            Arg::new("before")
-                .short('b')
-                .long("before")
-                .default_value(&before_default)
-                .value_name("YYYY-mm-dd")
-                .help("Archive emails before the given date"),
+            arg!("before")
+            .short('b')
+            .long("before")
+            .default_value(before_default)
+            .value_name("YYYY-mm-dd")
+            .help("Archive emails before the given date"),
         )
         .arg(
-            Arg::new("verbose")
-                .short('v')
-                .long("verbose")
-                .help("Set verbosity")
-                .multiple(true)
-                .takes_value(false),
+            arg!("verbose")
+            .short('v')
+            .long("verbose")
+            .help("Set verbosity")
+            .action(ArgAction::Count)
         )
         .arg(
-            Arg::new("input-maildir")
-                .required(true)
-                .value_name("INPUT_PATH")
-                .help("Input maildir path")
-                .index(1),
+            arg!("input-maildir")
+            .required(true)
+            .value_name("INPUT_PATH")
+            .help("Input maildir path")
+            .index(1),
         )
         .arg(
-            Arg::new("output-dir")
-                .required(true)
-                .value_name("OUTPUT_PATH")
-                .help("Output directory for archive maildirs")
-                .index(2),
+            arg!("output-dir")
+            .required(true)
+            .value_name("OUTPUT_PATH")
+            .help("Output directory for archive maildirs")
+            .index(2),
         )
         .get_matches();
     let dateformat = format_description!("[year]-[month]-[day]");
     let p = ProgramOptions {
-        // Unfortunately, Maildir doesn't implement trait FromStr
-        input_maildir: value_t_or_exit!(matches, "input-maildir", String).into(),
-        output_dir: value_t_or_exit!(matches, "output-dir", PathBuf),
-        before: Date::parse(&value_t_or_exit!(matches, "before", String), &dateformat).unwrap(),
-        prefix: value_t_or_exit!(matches, "prefix", String),
-        suffix: value_t_or_exit!(matches, "suffix", String),
-        split_by: match matches.value_of("split-by").unwrap() {
+        input_maildir: (*matches.get_one::<String>("input-maildir").unwrap().clone()).into(),
+        output_dir: (*matches.get_one::<PathBuf>("output-dir").unwrap().clone()).to_path_buf(),
+        before: Date::parse(matches.get_one::<String>("before").unwrap(), &dateformat).unwrap(),
+        prefix: matches.get_one::<String>("prefix").unwrap().clone(),
+        suffix: matches.get_one::<String>("suffix").unwrap().clone(),
+        split_by: match matches.get_one::<String>("split-by").unwrap().as_str() {
             "day" => SplitBy::Day,
             "month" => SplitBy::Month,
             "year" => SplitBy::Year,
             _ => SplitBy::None,
         },
-        verbosity: match matches.occurrences_of("verbose") {
+        verbosity: match matches.get_count("verbose") {
             0 => LevelFilter::Off,
             1 => LevelFilter::Error,
             2 => LevelFilter::Warn,
             3 => LevelFilter::Info,
             _ => LevelFilter::Debug,
         },
-        archive_mode: match matches.value_of("mode").unwrap() {
+        archive_mode: match matches.get_one::<String>("mode").unwrap().as_str() {
             "copy" => ArchiveMode::Copy,
             "move" => ArchiveMode::Move,
             _ => ArchiveMode::DryRun,

@@ -7,9 +7,9 @@ authors = ["Emanuele Di Giacomo <emanuele@digiacomo.cc>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "3"
+clap = { version = "4", features = ["cargo", "string"] }
 maildir = "0"
 time = { version = ">=0.2.23", features = ["parsing"] }
 log = "0"
-simple_logger = "2"
+simple_logger = "4"
 mktemp = "0"
