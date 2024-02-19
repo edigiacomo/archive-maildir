@@ -1,6 +1,6 @@
 use crate::archiver::*;
-use clap::{arg, command, ArgAction};
 use clap::builder::PossibleValue;
+use clap::{arg, command, ArgAction};
 use log::LevelFilter;
 use maildir::Maildir;
 use std::path::PathBuf;
@@ -37,74 +37,74 @@ pub fn parse_args() -> ProgramOptions {
         .about("Archive emails from maildir, grouping them by date")
         .arg(
             arg!("prefix")
-            .short('p')
-            .long("prefix")
-            .value_name("PREFIX")
-            .help("Prefix format")
-            .default_value(""),
+                .short('p')
+                .long("prefix")
+                .value_name("PREFIX")
+                .help("Prefix format")
+                .default_value(""),
         )
         .arg(
             arg!("suffix")
-            .short('s')
-            .long("suffix")
-            .value_name("SUFFIX")
-            .help("Suffix format")
-            .default_value(""),
+                .short('s')
+                .long("suffix")
+                .value_name("SUFFIX")
+                .help("Suffix format")
+                .default_value(""),
         )
         .arg(
             arg!("split-by")
-            .short('S')
-            .long("split-by")
-            .value_name("PERIOD")
-            .help("Set the split policy")
-            .value_parser([
-                PossibleValue::new("year"),
-                PossibleValue::new("month"),
-                PossibleValue::new("day"),
-                PossibleValue::new("none"),
-            ])
-            .default_value("year"),
+                .short('S')
+                .long("split-by")
+                .value_name("PERIOD")
+                .help("Set the split policy")
+                .value_parser([
+                    PossibleValue::new("year"),
+                    PossibleValue::new("month"),
+                    PossibleValue::new("day"),
+                    PossibleValue::new("none"),
+                ])
+                .default_value("year"),
         )
         .arg(
             arg!("mode")
-            .short('m')
-            .long("mode")
-            .help("Archive mode")
-            .value_parser([
-                PossibleValue::new("copy"),
-                PossibleValue::new("move"),
-                PossibleValue::new("dry-run"),
-            ])
-            .default_value("dry-run"),
+                .short('m')
+                .long("mode")
+                .help("Archive mode")
+                .value_parser([
+                    PossibleValue::new("copy"),
+                    PossibleValue::new("move"),
+                    PossibleValue::new("dry-run"),
+                ])
+                .default_value("dry-run"),
         )
         .arg(
             arg!("before")
-            .short('b')
-            .long("before")
-            .default_value(before_default)
-            .value_name("YYYY-mm-dd")
-            .help("Archive emails before the given date"),
+                .short('b')
+                .long("before")
+                .default_value(before_default)
+                .value_name("YYYY-mm-dd")
+                .help("Archive emails before the given date"),
         )
         .arg(
             arg!("verbose")
-            .short('v')
-            .long("verbose")
-            .help("Set verbosity")
-            .action(ArgAction::Count)
+                .short('v')
+                .long("verbose")
+                .help("Set verbosity")
+                .action(ArgAction::Count),
         )
         .arg(
             arg!("input-maildir")
-            .required(true)
-            .value_name("INPUT_PATH")
-            .help("Input maildir path")
-            .index(1),
+                .required(true)
+                .value_name("INPUT_PATH")
+                .help("Input maildir path")
+                .index(1),
         )
         .arg(
             arg!("output-dir")
-            .required(true)
-            .value_name("OUTPUT_PATH")
-            .help("Output directory for archive maildirs")
-            .index(2),
+                .required(true)
+                .value_name("OUTPUT_PATH")
+                .help("Output directory for archive maildirs")
+                .index(2),
         )
         .get_matches();
     let dateformat = format_description!("[year]-[month]-[day]");
